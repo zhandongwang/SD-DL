@@ -75,7 +75,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 }
 
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns {
-    NSString *path = [self makeDiskCachePath:ns];
+    NSString *path = [self makeDiskCachePath:ns];//带有namespace的path
     return [self initWithNamespace:ns diskCacheDirectory:path];
 }
 
@@ -84,7 +84,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     if ((self = [super init])) {
         NSString *fullNamespace = [@"com.hackemist.SDWebImageCache." stringByAppendingString:ns];
         
-        // Create IO serial queue
+        // Create IO serial queue  -----串行队列-------
         _ioQueue = dispatch_queue_create("com.hackemist.SDWebImageCache", DISPATCH_QUEUE_SERIAL);
         
         _config = [[SDImageCacheConfig alloc] init];
@@ -131,7 +131,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     SDDispatchQueueRelease(_ioQueue);
 }
-
+//核查队列
 - (void)checkIfQueueIsIOQueue {
     const char *currentQueueLabel = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
     const char *ioQueueLabel = dispatch_queue_get_label(self.ioQueue);
@@ -153,7 +153,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 }
 
 - (nullable NSString *)cachePathForKey:(nullable NSString *)key inPath:(nonnull NSString *)path {
-    NSString *filename = [self cachedFileNameForKey:key];
+    NSString *filename = [self cachedFileNameForKey:key];//key的MD5值
     return [path stringByAppendingPathComponent:filename];
 }
 
@@ -215,7 +215,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     
     if (toDisk) {
         dispatch_async(self.ioQueue, ^{
-            @autoreleasepool {
+            @autoreleasepool {//有比较耗内存的临时对象
                 NSData *data = imageData;
                 if (!data && image) {
                     // If we do not have any data to detect image format, use PNG format
@@ -236,7 +236,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
         }
     }
 }
-
+//同步存储
 - (void)storeImageDataToDisk:(nullable NSData *)imageData forKey:(nullable NSString *)key {
     if (!imageData || !key) {
         return;
@@ -497,8 +497,8 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 
         // Enumerate all of the files in the cache directory.  This loop has two purposes:
         //
-        //  1. Removing files that are older than the expiration date.
-        //  2. Storing file attributes for the size-based cleanup pass.
+        //  1. Removing files that are older than the expiration date.  删除过期的
+        //  2. Storing file attributes for the size-based cleanup pass.  为后面基于size的一轮清理存储属性
         NSMutableArray<NSURL *> *urlsToDelete = [[NSMutableArray alloc] init];
         for (NSURL *fileURL in fileEnumerator) {
             NSError *error;
@@ -527,12 +527,12 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
         }
 
         // If our remaining disk cache exceeds a configured maximum size, perform a second
-        // size-based cleanup pass.  We delete the oldest files first.
+        // size-based cleanup pass.  We delete the oldest files first.  清理最老的文件
         if (self.config.maxCacheSize > 0 && currentCacheSize > self.config.maxCacheSize) {
             // Target half of our maximum cache size for this cleanup pass.
             const NSUInteger desiredCacheSize = self.config.maxCacheSize / 2;
 
-            // Sort the remaining cache files by their last modification time (oldest first).
+            // Sort the remaining cache files by their last modification time (oldest first). 按修改日期排序
             NSArray<NSURL *> *sortedFiles = [cacheFiles keysSortedByValueWithOptions:NSSortConcurrent
                                                                      usingComparator:^NSComparisonResult(id obj1, id obj2) {
                                                                          return [obj1[NSURLContentModificationDateKey] compare:obj2[NSURLContentModificationDateKey]];

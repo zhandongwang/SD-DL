@@ -24,15 +24,15 @@ typedef NS_ENUM(NSInteger, SDImageCacheType) {
      */
     SDImageCacheTypeMemory
 };
-
+//从缓存中获取image
 typedef void(^SDCacheQueryCompletedBlock)(UIImage * _Nullable image, NSData * _Nullable data, SDImageCacheType cacheType);
-
+//检查是否在缓存中
 typedef void(^SDWebImageCheckCacheCompletionBlock)(BOOL isInCache);
 
 typedef void(^SDWebImageCalculateSizeBlock)(NSUInteger fileCount, NSUInteger totalSize);
 
 
-/**
+/** -----异步磁盘缓存--------
  * SDImageCache maintains a memory cache and an optional disk cache. Disk cache write operations are performed
  * asynchronous so it doesn’t add unnecessary latency to the UI.
  */
@@ -122,7 +122,7 @@ typedef void(^SDWebImageCalculateSizeBlock)(NSUInteger fileCount, NSUInteger tot
  * Asynchronously store an image into memory and disk cache at the given key.
  *
  * @param image           The image to store
- * @param imageData       The image data as returned by the server, this representation will be used for disk storage
+ * @param imageData       The image data as returned by the server, this representation will be used for disk storage ------服务端返回的data,用以store--------
  *                        instead of converting the given image object into a storable/compressed image format in order
  *                        to save quality and CPU
  * @param key             The unique image cache key, usually it's image absolute URL

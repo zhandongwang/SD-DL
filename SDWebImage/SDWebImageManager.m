@@ -259,16 +259,16 @@
 }
 
 - (void)cancelAll {
-    @synchronized (self.runningOperations) {
+    @synchronized (self.runningOperations) {//线程安全
         NSArray<SDWebImageCombinedOperation *> *copiedOperations = [self.runningOperations copy];
         [copiedOperations makeObjectsPerformSelector:@selector(cancel)];
         [self.runningOperations removeObjectsInArray:copiedOperations];
     }
 }
-
+//是否有正在执行的operation
 - (BOOL)isRunning {
     BOOL isRunning = NO;
-    @synchronized (self.runningOperations) {
+    @synchronized (self.runningOperations) {//线程安全
         isRunning = (self.runningOperations.count > 0);
     }
     return isRunning;
@@ -322,7 +322,7 @@
 }
 
 - (void)cancel {
-    @synchronized(self) {
+    @synchronized(self) {//线程安全
         self.cancelled = YES;
         if (self.cacheOperation) {
             [self.cacheOperation cancel];

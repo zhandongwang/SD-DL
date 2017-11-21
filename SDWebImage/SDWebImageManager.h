@@ -35,7 +35,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
      */
     SDWebImageProgressiveDownload = 1 << 3,
 
-    /**
+    /** -----即使本地有缓存，遵从协议的缓存规则------
      * Even if the image is cached, respect the HTTP response cache control, and refresh the image from remote location if needed.
      * The disk caching will be handled by NSURLCache instead of SDWebImage leading to slight performance degradation.
      * This option helps deal with images changing behind the same request URL, e.g. Facebook graph api profile pics.
@@ -75,7 +75,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
      */
     SDWebImageDelayPlaceholder = 1 << 9,
 
-    /**
+    /** -----变换动画image anyway---------
      * We usually don't call transformDownloadedImage delegate method on animated images,
      * as most transformation code would mangle it.
      * Use this flag to transform them anyway.
@@ -98,7 +98,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
 };
 
 typedef void(^SDExternalCompletionBlock)(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL);
-
+//带有data & finished
 typedef void(^SDInternalCompletionBlock)(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL);
 
 typedef NSString * _Nullable (^SDWebImageCacheKeyFilterBlock)(NSURL * _Nullable url);
@@ -163,7 +163,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
 @property (strong, nonatomic, readonly, nullable) SDImageCache *imageCache;
 @property (strong, nonatomic, readonly, nullable) SDWebImageDownloader *imageDownloader;
 
-/**
+/** -----在转换URL到cache key是可以被用到-------
  * The cache filter is a block used each time SDWebImageManager need to convert an URL into a cache key. This can
  * be used to remove dynamic part of an image URL.
  *
@@ -194,7 +194,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
  */
 - (nonnull instancetype)initWithCache:(nonnull SDImageCache *)cache downloader:(nonnull SDWebImageDownloader *)downloader NS_DESIGNATED_INITIALIZER;
 
-/**
+/**--------如果缓存中没有Image,则下载-----------
  * Downloads the image at the given URL if not present in cache or return the cached version otherwise.
  *
  * @param url            The URL to the image
@@ -244,7 +244,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
  */
 - (BOOL)isRunning;
 
-/**
+/** -----异步检测图片是否被缓存过，在主线程执行completion block--------
  *  Async check if image has already been cached
  *
  *  @param url              image url
@@ -267,7 +267,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
                    completion:(nullable SDWebImageCheckCacheCompletionBlock)completionBlock;
 
 
-/**
+/** ------获取URL对应的cache key-------
  *Return the cache key for a given URL
  */
 - (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url;
