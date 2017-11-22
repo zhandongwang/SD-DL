@@ -48,10 +48,10 @@ static char TAG_ACTIVITY_SHOW;
                          completed:(nullable SDExternalCompletionBlock)completedBlock
                            context:(nullable NSDictionary *)context {
     NSString *validOperationKey = operationKey ?: NSStringFromClass([self class]);
-    [self sd_cancelImageLoadOperationWithKey:validOperationKey];
+    [self sd_cancelImageLoadOperationWithKey:validOperationKey];//取消之前的operation
     objc_setAssociatedObject(self, &imageURLKey, url, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
-    if (!(options & SDWebImageDelayPlaceholder)) {
+    if (!(options & SDWebImageDelayPlaceholder)) {//占位图
         dispatch_main_async_safe(^{
             [self sd_setImage:placeholder imageData:nil basedOnClassOrViaCustomSetImageBlock:setImageBlock];
         });
@@ -64,7 +64,11 @@ static char TAG_ACTIVITY_SHOW;
         }
         
         __weak __typeof(self)wself = self;
-        id <SDWebImageOperation> operation = [SDWebImageManager.sharedManager loadImageWithURL:url options:options progress:progressBlock completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        id <SDWebImageOperation> operation = [SDWebImageManager.sharedManager
+                                              loadImageWithURL:url
+                                                      options:options
+                                                      progress:progressBlock
+                                                      completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
             __strong __typeof (wself) sself = wself;
             [sself sd_removeActivityIndicator];
             if (!sself) { return; }

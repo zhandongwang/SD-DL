@@ -146,7 +146,8 @@
             return;
         }
 
-        if ((!cachedImage || options & SDWebImageRefreshCached) && (![self.delegate respondsToSelector:@selector(imageManager:shouldDownloadImageForURL:)] || [self.delegate imageManager:self shouldDownloadImageForURL:url])) {
+        if ((!cachedImage || options & SDWebImageRefreshCached)
+            && (![self.delegate respondsToSelector:@selector(imageManager:shouldDownloadImageForURL:)] || [self.delegate imageManager:self shouldDownloadImageForURL:url])) {
             if (cachedImage && options & SDWebImageRefreshCached) {
                 // If image was found in the cache but SDWebImageRefreshCached is provided, notify about the cached image
                 // AND try to re-download it in order to let a chance to NSURLCache to refresh it from server.
@@ -171,7 +172,11 @@
                 downloaderOptions |= SDWebImageDownloaderIgnoreCachedResponse;
             }
             
-            SDWebImageDownloadToken *subOperationToken = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *downloadedData, NSError *error, BOOL finished) {
+            SDWebImageDownloadToken *subOperationToken = [self.imageDownloader
+                                                          downloadImageWithURL:url
+                                                               options:downloaderOptions
+                                                              progress:progressBlock
+                                                              completed:^(UIImage *downloadedImage, NSData *downloadedData, NSError *error, BOOL finished) {
                 __strong __typeof(weakOperation) strongOperation = weakOperation;
                 if (!strongOperation || strongOperation.isCancelled) {
                     // Do nothing if the operation was cancelled
@@ -236,7 +241,7 @@
                     [self safelyRemoveOperationFromRunning:strongOperation];
                 };
             }
-        } else if (cachedImage) {
+        } else if (cachedImage) {//有缓存的图片
             __strong __typeof(weakOperation) strongOperation = weakOperation;
             [self callCompletionBlockForOperation:strongOperation completion:completedBlock image:cachedImage data:cachedData error:nil cacheType:cacheType finished:YES url:url];
             [self safelyRemoveOperationFromRunning:operation];

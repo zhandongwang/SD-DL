@@ -33,12 +33,12 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
 // This is weak because it is injected by whoever manages this session. If this gets nil-ed out, we won't be able to run
 // the task associated with this operation
 @property (weak, nonatomic, nullable) NSURLSession *unownedSession;
-// This is set if we're using not using an injected NSURLSession. We're responsible of invalidating this one
+// This is set if we're not using an injected NSURLSession. We're responsible of invalidating this one
 @property (strong, nonatomic, nullable) NSURLSession *ownedSession;
 
 @property (strong, nonatomic, readwrite, nullable) NSURLSessionTask *dataTask;
 
-@property (SDDispatchQueueSetterSementics, nonatomic, nullable) dispatch_queue_t barrierQueue;
+@property (SDDispatchQueueSetterSementics, nonatomic, nullable) dispatch_queue_t barrierQueue;//并发
 
 #if SD_UIKIT
 @property (assign, nonatomic) UIBackgroundTaskIdentifier backgroundTaskId;
@@ -83,7 +83,7 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
     SDCallbacksDictionary *callbacks = [NSMutableDictionary new];
     if (progressBlock) callbacks[kProgressCallbackKey] = [progressBlock copy];
     if (completedBlock) callbacks[kCompletedCallbackKey] = [completedBlock copy];
-    dispatch_barrier_async(self.barrierQueue, ^{
+    dispatch_barrier_async(self.barrierQueue, ^{//线程写安全
         [self.callbackBlocks addObject:callbacks];
     });
     return callbacks;
@@ -91,7 +91,7 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
 
 - (nullable NSArray<id> *)callbacksForKey:(NSString *)key {
     __block NSMutableArray<id> *callbacks = nil;
-    dispatch_sync(self.barrierQueue, ^{
+    dispatch_sync(self.barrierQueue, ^{//线程读安全
         // We need to remove [NSNull null] because there might not always be a progress block for each callback
         callbacks = [[self.callbackBlocks valueForKey:key] mutableCopy];
         [callbacks removeObjectIdenticalTo:[NSNull null]];
@@ -107,7 +107,7 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
             shouldCancel = YES;
         }
     });
-    if (shouldCancel) {
+    if (shouldCancel) {//所有callbackBlocks被cancel,则cancel掉operation
         [self cancel];
     }
     return shouldCancel;
@@ -115,7 +115,7 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
 
 - (void)start {
     @synchronized (self) {
-        if (self.isCancelled) {
+        if (self.isCancelled) {//检查cancel
             self.finished = YES;
             [self reset];
             return;
@@ -295,9 +295,9 @@ didReceiveResponse:(NSURLResponse *)response
         
         //This is the case when server returns '304 Not Modified'. It means that remote image is not changed.
         //In case of 304 we need just cancel the operation and return cached image from the cache.
-        if (code == 304) {
+        if (code == 304) {//remote资源未被修改
             [self cancelInternal];
-        } else {
+        } else {//发生错误
             [self.dataTask cancel];
         }
         __weak typeof(self) weakSelf = self;

@@ -14,7 +14,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageDownloaderOptions) {
     SDWebImageDownloaderLowPriority = 1 << 0,
     SDWebImageDownloaderProgressiveDownload = 1 << 1,
 
-    /**
+    /** ----使用NSURLCache(map NSURLRequest to NSCachedURLResponse, a composite in-memory and on-dish chache)----
      * By default, request prevent the use of NSURLCache. With this flag, NSURLCache
      * is used with default policies.
      */
@@ -111,7 +111,7 @@ typedef SDHTTPHeadersDictionary * _Nullable (^SDWebImageDownloaderHeadersFilterB
  */
 @property (readonly, nonatomic) NSUInteger currentDownloadCount;
 
-/**
+/** ------默认下载超时时间-------
  *  The timeout value (in seconds) for the download operation. Default: 15.0.
  */
 @property (assign, nonatomic) NSTimeInterval downloadTimeout;
@@ -211,6 +211,9 @@ typedef SDHTTPHeadersDictionary * _Nullable (^SDWebImageDownloaderHeadersFilterB
  *                       repeatedly with the partial image object and the finished argument set to NO
  *                       before to be called a last time with the full image and finished argument
  *                       set to YES. In case of error, the finished argument is always YES.
+                  -----如果没有设置SDWebImageDownloaderProgressiveDownload，finished始终是YES-----
+                  -----如果设置SDWebImageDownloaderProgressiveDownload，completedBlock会被不停调用并且finished=NO----
+                  -----直到图片下载完成时finished=YES,如果失败finished始终为NO---------
  *
  * @return A token (SDWebImageDownloadToken) that can be passed to -cancel: to cancel this operation
  */
@@ -239,7 +242,7 @@ typedef SDHTTPHeadersDictionary * _Nullable (^SDWebImageDownloaderHeadersFilterB
 /**
  * Forces SDWebImageDownloader to create and use a new NSURLSession that is
  * initialized with the given configuration.
- * *Note*: All existing download operations in the queue will be cancelled.
+ * *Note*: All existing download operations in the queue will be cancelled.----队列中的所有operations会被取消-----
  * *Note*: `timeoutIntervalForRequest` is going to be overwritten.
  *
  * @param sessionConfiguration The configuration to use for the new NSURLSession

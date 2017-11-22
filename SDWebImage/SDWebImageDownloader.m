@@ -171,7 +171,7 @@
                                                                 timeoutInterval:timeoutInterval];
         
         request.HTTPShouldHandleCookies = (options & SDWebImageDownloaderHandleCookies);
-        request.HTTPShouldUsePipelining = YES;
+        request.HTTPShouldUsePipelining = YES;//在收到上一个request的response之前是否可以继续发生请求
         if (sself.headersFilter) {
             request.allHTTPHeaderFields = sself.headersFilter(url, [sself.HTTPHeaders copy]);
         }
@@ -194,7 +194,7 @@
         }
 
         [sself.downloadQueue addOperation:operation];
-        if (sself.executionOrder == SDWebImageDownloaderLIFOExecutionOrder) {
+        if (sself.executionOrder == SDWebImageDownloaderLIFOExecutionOrder) {//后进先出
             // Emulate LIFO execution order by systematically adding new operations as last operation's dependency
             [sself.lastAddedOperation addDependency:operation];
             sself.lastAddedOperation = operation;
@@ -205,10 +205,10 @@
 }
 
 - (void)cancel:(nullable SDWebImageDownloadToken *)token {
-    dispatch_barrier_async(self.barrierQueue, ^{
+    dispatch_barrier_async(self.barrierQueue, ^{//异步取消回调
         SDWebImageDownloaderOperation *operation = self.URLOperations[token.url];
         BOOL canceled = [operation cancel:token.downloadOperationCancelToken];
-        if (canceled) {
+        if (canceled) {//operation被cancel掉
             [self.URLOperations removeObjectForKey:token.url];
         }
     });
@@ -245,7 +245,7 @@
 				});
             };
         }
-        id downloadOperationCancelToken = [operation addHandlersForProgress:progressBlock completed:completedBlock];
+        id downloadOperationCancelToken = [operation addHandlersForProgress:progressBlock completed:completedBlock];//NSMutableDictionary
 
         token = [SDWebImageDownloadToken new];
         token.url = url;

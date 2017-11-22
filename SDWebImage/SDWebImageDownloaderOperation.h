@@ -105,14 +105,14 @@ FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadFinishNotification
  *  @param completedBlock the block executed when the download is done.
  *                        @note the completed block is executed on the main queue for success. If errors are found, there is a chance the block will be executed on a background queue
  *
- *  @return the token to use to cancel this set of handlers
+ *  @return the token to use to cancel this set of handlers  -----返回可用于cancel的token对象--------
  */
 - (nullable id)addHandlersForProgress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
                             completed:(nullable SDWebImageDownloaderCompletedBlock)completedBlock;
 
 /**
  *  Cancels a set of callbacks. Once all callbacks are canceled, the operation is cancelled.
- *
+ * -----一旦所有的callbacks被cancel,那么operation也将被cancel--------
  *  @param token the token representing a set of callbacks to cancel
  *
  *  @return YES if the operation was stopped because this was the last token to be canceled. NO otherwise.
